@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\Namai\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\Namai\\.nuget\\packages"
+    ]
+  }
+}
