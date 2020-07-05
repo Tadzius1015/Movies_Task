@@ -1,0 +1,18 @@
+.alignCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalSize {
+    width: 450px;
+    text-align: center;
+}
+
+.inputSize {
+    width: 400px;
+}
+
+.cursor {
+    cursor: pointer;
+}
