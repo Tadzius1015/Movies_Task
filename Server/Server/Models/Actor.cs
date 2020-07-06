@@ -15,7 +15,7 @@ namespace Server.Models
 
         [Required(ErrorMessage = "The first name field is required")]
         [MinLength(3, ErrorMessage = "The name must be at least 3 characters")]
-        [MaxLength(40, ErrorMessage = "The title may not exceed 40 characters")]
+        [MaxLength(40, ErrorMessage = "The name may not exceed 40 characters")]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "The name must contain letters only")]
         public string Name { get; set; }
 

@@ -15,5 +15,7 @@ namespace Server.Data
         }
 
         public DbSet<Server.Models.Actor> Actor { get; set; }
+
+        public DbSet<Server.Models.Genre> Genre { get; set; }
     }
 }
