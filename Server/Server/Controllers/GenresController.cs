@@ -14,9 +14,9 @@ namespace Server.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly ActorsContext _context;
+        private readonly ServerContext _context;
 
-        public GenresController(ActorsContext context)
+        public GenresController(ServerContext context)
         {
             _context = context;
         }

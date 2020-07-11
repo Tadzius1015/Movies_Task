@@ -30,9 +30,14 @@ namespace Server
 
             services.AddControllers().AddNewtonsoftJson();
 
-            services.AddDbContext<ActorsContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("ActorsContext")));
-        
+            services.AddDbContext<ServerContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("ServerContext")));
+
+            services.AddControllers()
+                  .AddNewtonsoftJson(options =>
+                      options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                   );
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +63,8 @@ namespace Server
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseHttpsRedirection();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -67,6 +74,11 @@ namespace Server
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapControllerRoute(
+                    name: "search",
+                    pattern: "{controller=Movies}/{action=Search}/{pattern?}/{searchType?}"
+                    );
             });
         }
     }

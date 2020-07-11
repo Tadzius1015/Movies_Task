@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Server.Models
 {
@@ -16,6 +17,11 @@ namespace Server.Models
         [MinLength(3, ErrorMessage = "The genre name must be at least 3 characters")]
         [MaxLength(20, ErrorMessage = "The genre name may not exceed 20 characters")]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "The genre name must contain letters only")]
+        [JsonProperty("name")]
         public string Name { get; set; }
+
+        [ForeignKey("GenreId")]
+        [JsonIgnore]
+        public List<MovieGenre> MovieGenre { get; set; }
     }
 }

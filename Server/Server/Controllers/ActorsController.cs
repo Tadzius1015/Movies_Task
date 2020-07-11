@@ -14,9 +14,9 @@ namespace Server.Controllers
     [ApiController]
     public class ActorsController : ControllerBase
     {
-        private readonly ActorsContext _context;
+        private readonly ServerContext _context;
 
-        public ActorsController(ActorsContext context)
+        public ActorsController(ServerContext context)
         {
             _context = context;
         }
@@ -50,15 +50,11 @@ namespace Server.Controllers
         {
             if (id != actor.Id)
             {
-                return BadRequest(actor);
-            }
-
-            if (ActorExists(actor))
-            {
-                return BadRequest("This actor is existing in system");     
+                return BadRequest();
             }
 
             _context.Entry(actor).State = EntityState.Modified;
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -84,10 +80,6 @@ namespace Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Actor>> PostActor(Actor actor)
         {
-            if (ActorExists(actor))
-            {
-                return BadRequest("This actor is existing in system");
-            }
             _context.Actor.Add(actor);
             await _context.SaveChangesAsync();
 
@@ -113,10 +105,6 @@ namespace Server.Controllers
         private bool ActorExists(int id)
         {
             return _context.Actor.Any(e => e.Id == id);
-        }
-        private bool ActorExists(Actor actor)
-        {
-            return _context.Actor.Any(el => el.Name.ToLower().Equals(actor.Name.ToLower()) && el.LastName.ToLower().Equals(actor.LastName.ToLower()));
         }
     }
 }
