@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using Server.DTOS;
 using Server.Models;
+using Server.Services;
 
 namespace Server.Controllers
 {
@@ -14,37 +16,40 @@ namespace Server.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly ServerContext _context;
+        private IGenreRepository _genreRepository;
 
-        public GenresController(ServerContext context)
+        public GenresController(IGenreRepository genreRepository)
         {
-            _context = context;
+            _genreRepository = genreRepository;
         }
 
         // GET: api/Genres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenre()
+        public ActionResult<IEnumerable<GenreDTO>> GetGenre()
         {
-            return await _context.Genre.ToListAsync();
+            return Ok(_genreRepository.GetGenre());
         }
 
         // GET: api/Genres/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Genre>> GetGenre(int id)
+        public ActionResult<GenreDTO> GetGenre(int id)
         {
-            var genre = await _context.Genre.FindAsync(id);
+            if (id <= 0)
+            {
+                return NotFound();
+            }
+
+            var genre = _genreRepository.GetGenre(id);
 
             if (genre == null)
             {
                 return NotFound();
             }
 
-            return genre;
+            return Ok(genre);
         }
 
         // PUT: api/Genres/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
@@ -52,59 +57,37 @@ namespace Server.Controllers
             {
                 return BadRequest();
             }
-
-            _context.Entry(genre).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GenreExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Genres
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Genre>> PostGenre(Genre genre)
-        {
-            _context.Genre.Add(genre);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetGenre", new { id = genre.Id }, genre);
-        }
-
-        // DELETE: api/Genres/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Genre>> DeleteGenre(int id)
-        {
-            var genre = await _context.Genre.FindAsync(id);
-            if (genre == null)
+            if (!_genreRepository.GenreExists(id))
             {
                 return NotFound();
             }
 
-            _context.Genre.Remove(genre);
-            await _context.SaveChangesAsync();
-
-            return genre;
+            return Ok(await _genreRepository.PutGenre(id, genre));
         }
 
-        private bool GenreExists(int id)
+        // POST: api/Genres
+        [HttpPost]
+        public async Task<ActionResult<GenreDTO>> PostGenre(Genre genre)
         {
-            return _context.Genre.Any(e => e.Id == id);
+            if (_genreRepository.GenreExists(genre.Name))
+            {
+                return BadRequest("Genre exists in system!");
+            }
+
+            return CreatedAtAction("GetGenre", new { id = genre.Id }, await _genreRepository.PostGenre(genre));
+        }
+
+        // DELETE: api/Genres/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<GenreDTO>> DeleteGenre(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+            await _genreRepository.DeleteGenre(id);
+
+            return NoContent();
         }
     }
 }

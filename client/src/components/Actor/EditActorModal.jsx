@@ -40,7 +40,7 @@ export default class EditActorModal extends React.Component {
             <div>
                 <Paper className="modalSize">
                     <Typography style={{marginBottom:'30px', marginTop:'30px', textAlign:'center'}} variant="h5" component="h1">
-                        Actor editing form
+                        Actor {this.state.name + ' ' + this.state.lastName} editing form
                     </Typography>
                     <FormControl>
                         <TextField

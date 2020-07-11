@@ -149,5 +149,7 @@ C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\Propert
 C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.JsonPatch.dll
 C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\Newtonsoft.Json.Bson.dll
+C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\AutoMapper.dll
 C:\Users\Namai\Desktop\Movies_Task\Server\Server\obj\Debug\netcoreapp3.1\Server.csproj.CoreCompileInputs.cache
 C:\Users\Namai\Desktop\Movies_Task\Server\Server\obj\Debug\netcoreapp3.1\Server.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Namai\Desktop\Movies_Task\Server\Server\bin\Debug\netcoreapp3.1\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
