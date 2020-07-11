@@ -22,3 +22,8 @@
     max-height: 200px;
     overflow: auto;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+}

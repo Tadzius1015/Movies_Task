@@ -23,14 +23,15 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import EditMovieModal from "./components/Movies/EditMovieModal";
+import Pagination from "@material-ui/lab/Pagination/Pagination";
 
 class Movies extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {movies: [], actors: [], genres: [], openAdding: false, nameErrors: '', releaseDateErrors: '',
+        this.state = {movies: [], moviesShowing: [], actors: [], genres: [], openAdding: false, nameErrors: '', releaseDateErrors: '',
             openEditing: false, row: {}, movieId: '', openDeleting: false, message: '', openSnackbar: false,
-            openSnackbarError: false, openActorsList: false, pattern: '', searchType: ''};
+            openSnackbarError: false, openActorsList: false, pattern: '', searchType: '', currentPage: '', pagesCount: ''};
 
         this.getData = this.getData.bind(this);
         this.insertMovie = this.insertMovie.bind(this);
@@ -54,6 +55,10 @@ class Movies extends React.Component {
         this.addNewGenresToMovie = this.addNewGenresToMovie.bind(this);
         this.deleteActorsFromMovie = this.deleteActorsFromMovie.bind(this);
         this.deleteGenresFromMovie = this.deleteGenresFromMovie.bind(this);
+        this.makeData = this.makeData.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
+        this.calculatePagesCount = this.calculatePagesCount.bind(this);
+        this.addAndRemoveMoviesAndActors = this.addAndRemoveMoviesAndActors.bind(this);
     }
 
     componentWillMount() {
@@ -90,10 +95,7 @@ class Movies extends React.Component {
                 releaseDate: releaseDate,
                 id: id,
             });
-            this.deleteActorsFromMovie(deletingActorsArray, id);
-            this.deleteGenresFromMovie(deletingGenresArray, id);
-            this.addNewActorsToMovie(addingActorsArray, id);
-            this.addNewGenresToMovie(addingGenresArray, id);
+            this.addAndRemoveMoviesAndActors(deletingGenresArray, deletingActorsArray, addingActorsArray, addingGenresArray, id);
             this.setState({message: 'Movie updated successfully!'});
             this.setState({openSnackbar: true});
             this.handleCloseEditingMovie();
@@ -112,6 +114,9 @@ class Movies extends React.Component {
             const moviesResponse = await axios.get(API_BASE_URL + `/movies`);
             const actorsResponse = await axios.get(API_BASE_URL + `/actors`);
             const genresResponse = await axios.get(API_BASE_URL + `/genres`);
+            this.makeData(moviesResponse.data, 1);
+            this.setState({currentPage: 1});
+            this.calculatePagesCount(moviesResponse.data);
             this.setState({movies: moviesResponse.data});
             this.setState({actors: actorsResponse.data});
             this.setState({genres: genresResponse.data});
@@ -134,17 +139,32 @@ class Movies extends React.Component {
 
     setErrorsForInputs(err) {
         let errorMsg;
-        if(err.response.data.errors.Name) {
+        if (err.response.data.errors.Name) {
             errorMsg = err.response.data.errors.Name[0];
             this.setState({nameErrors: errorMsg});
         } else {
             this.setState({nameErrors: ""});
         }
-        if(err.response.data.errors.ReleaseDate) {
+        if (err.response.data.errors.ReleaseDate) {
             errorMsg = err.response.data.errors.ReleaseDate[0];
             this.setState({releaseDateErrors: errorMsg});
         } else {
             this.setState({releaseDateErrors: ""});
+        }
+    }
+
+    addAndRemoveMoviesAndActors(deletingGenresArray, deletingActorsArray, addingActorsArray, addingGenresArray, id) {
+        if (deletingGenresArray.length > 0) {
+            this.deleteGenresFromMovie(deletingGenresArray, id);
+        }
+        if (deletingActorsArray.length > 0) {
+            this.deleteActorsFromMovie(deletingActorsArray, id);
+        }
+        if (addingActorsArray.length > 0) {
+            this.addNewActorsToMovie(addingActorsArray, id);
+        }
+        if (addingGenresArray.length > 0) {
+            this.addNewGenresToMovie(addingGenresArray, id);
         }
     }
 
@@ -210,6 +230,9 @@ class Movies extends React.Component {
         if (searchText !== '' && searchType !== '') {
             const response = await axios.get(API_BASE_URL + `/movies/${searchText}/${searchType}`);
             this.setState({movies: response.data});
+            this.makeData(response.data, 1);
+            this.calculatePagesCount(response.data);
+            this.setState({currentPage: 1});
         } else if (searchText === '' || searchType === '') {
             this.getData();
         }
@@ -249,6 +272,36 @@ class Movies extends React.Component {
         }, 4000);
     }
 
+    makeData(array, page) {
+        let tmpMovies = [];
+        const itemsPerPage = 10;
+        this.setState({moviesShowing: []});
+        for (let i = (page - 1) * itemsPerPage; i < ((page - 1) * itemsPerPage) + itemsPerPage; i++) {
+            if (array[i] !== undefined) {
+                tmpMovies.push(array[i]);
+            } else {
+                break;
+            }
+        }
+        this.setState({moviesShowing: tmpMovies});
+    }
+
+    calculatePagesCount(array) {
+        let pagesCount = 0;
+        const itemsPerPage = 10;
+        if (array.length % itemsPerPage === 0) {
+            pagesCount = Math.floor(array.length / itemsPerPage);
+        } else {
+            pagesCount = Math.floor(array.length / itemsPerPage) + 1;
+        }
+        this.setState({pagesCount: pagesCount});
+    }
+
+    handlePageChange(event, page) {
+        this.makeData(this.state.movies, page);
+        this.setState({currentPage: page});
+    }
+
     render() {
         return (
             <div>
@@ -286,7 +339,7 @@ class Movies extends React.Component {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {this.state.movies.map((row, index) => (
+                        {this.state.moviesShowing.map((row, index) => (
                             <TableRow key={index}>
                                 <TableCell align="left">{row.name}</TableCell>
                                 <TableCell align="left">{row.releaseDate.split('T')[0]}</TableCell>
@@ -311,6 +364,9 @@ class Movies extends React.Component {
                 </Table>
                 <div>
                     <img className="cursor" src={addIcon} onClick={this.handleOpenAddingNewMovie}></img>
+                </div>
+                <div className="pagination">
+                    <Pagination count={this.state.pagesCount} variant="outlined" onChange={this.handlePageChange} page={this.state.currentPage}/>
                 </div>
                 <Modal
                     open={this.state.openAdding}

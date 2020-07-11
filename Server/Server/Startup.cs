@@ -11,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Server.Data;
+using Server.Services;
+using AutoMapper;
+using Server.Helpers;
 
 namespace Server
 {
@@ -37,6 +40,20 @@ namespace Server
                   .AddNewtonsoftJson(options =>
                       options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                    );
+
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new Mappings());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddScoped<IActorRepository, ActorRepository>();
+            services.AddScoped<IGenreRepository, GenreRepository>();
+            services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<IMovieGenreRepository, MovieGenreRepository>();
+            services.AddScoped<IMovieActorRepository, MovieActorRepository>();
 
         }
 

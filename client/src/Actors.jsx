@@ -17,14 +17,15 @@ import EditActorModal from "./components/Actor/EditActorModal";
 import DeleteActorModal from "./components/Actor/DeleteActorModal";
 import SuccessSnackbar from "./components/Snackbar/SuccessSnackbar";
 import ErrorSnackbar from "./components/Snackbar/ErrorSnackbar";
+import Pagination from "@material-ui/lab/Pagination";
 
 class Actors extends React.Component {
 
 
     constructor(props) {
         super(props);
-        this.state = {actors: [], openAdding: false, nameErrors: '', lastNameErrors: '', birthDateErrors: '', openEditing: false,
-            row: '', actorId: '', openDeleting: false, message: '', openSnackbar: false, openSnackbarError: false};
+        this.state = {actors: [], actorsShowing: [], openAdding: false, nameErrors: '', lastNameErrors: '', birthDateErrors: '', openEditing: false,
+            row: '', actorId: '', openDeleting: false, message: '', openSnackbar: false, openSnackbarError: false, pagesCount: '', currentPage: ''};
 
         this.getAllActors = this.getAllActors.bind(this);
         this.insertActor = this.insertActor.bind(this);
@@ -36,9 +37,12 @@ class Actors extends React.Component {
         this.handleCloseEditingActor = this.handleCloseEditingActor.bind(this);
         this.handleOpenDeletingActor = this.handleOpenDeletingActor.bind(this);
         this.handleCloseDeletingActor = this.handleCloseDeletingActor.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
         this.unsetSnackbar = this.unsetSnackbar.bind(this);
         this.setErrorsForInputs = this.setErrorsForInputs.bind(this);
         this.clearInputErrors = this.clearInputErrors.bind(this);
+        this.makeData = this.makeData.bind(this);
+        this.calculatePagesCount = this.calculatePagesCount.bind(this);
     }
 
     componentWillMount() {
@@ -60,7 +64,7 @@ class Actors extends React.Component {
         } catch (err) {
             if (err.response && err.response.data.errors) {
                 this.setErrorsForInputs(err);
-            } else {
+            } else if (err.response.data) {
                 this.setState({message: err.response.data});
                 this.setState({openSnackbarError: true});
                 this.unsetSnackbar();
@@ -85,9 +89,6 @@ class Actors extends React.Component {
             if (err.response && err.response.data.errors) {
                 this.setErrorsForInputs(err);
             }
-            // this.setState({message: err.response.data});
-            // this.setState({openSnackbarError: true});
-            // this.unsetSnackbar();
         }
     }
 
@@ -95,6 +96,9 @@ class Actors extends React.Component {
         try {
             const response = await axios.get(API_BASE_URL + `/actors`);
             this.setState({actors: response.data});
+            this.makeData(response.data, 1);
+            this.setState({currentPage: 1});
+            this.calculatePagesCount(response.data);
         } catch (err) {
             console.log(err);
         }
@@ -108,27 +112,25 @@ class Actors extends React.Component {
             this.handleCloseDeletingActor();
             this.getAllActors();
         } catch (err) {
-            this.setState({message: err.response.data});
-            this.setState({openSnackbarError: true});
-            this.unsetSnackbar();
+            console.log(err);
         }
     }
 
     setErrorsForInputs(err) {
         let errorMsg;
-        if(err.response.data.errors.Name) {
+        if (err.response.data.errors.Name) {
             errorMsg = err.response.data.errors.Name[0];
             this.setState({nameErrors: errorMsg});
         } else {
             this.setState({nameErrors: ""});
         }
-        if(err.response.data.errors.LastName) {
+        if (err.response.data.errors.LastName) {
             errorMsg = err.response.data.errors.LastName[0];
             this.setState({lastNameErrors: errorMsg});
         } else {
             this.setState({lastNameErrors: ""});
         }
-        if(err.response.data.errors.BirthDate) {
+        if (err.response.data.errors.BirthDate) {
             errorMsg = err.response.data.errors.BirthDate[0];
             this.setState({birthDateErrors: errorMsg});
         } else {
@@ -182,6 +184,36 @@ class Actors extends React.Component {
         }, 4000);
     }
 
+    makeData(array, page) {
+        let tmpActors = [];
+        const itemsPerPage = 10;
+        this.setState({actorsShowing: []});
+        for (let i = (page - 1) * itemsPerPage; i < ((page - 1) * itemsPerPage) + itemsPerPage; i++) {
+            if (array[i] !== undefined) {
+                tmpActors.push(array[i]);
+            } else {
+                break;
+            }
+        }
+        this.setState({actorsShowing: tmpActors});
+    }
+
+    calculatePagesCount(array) {
+        let pagesCount = 0;
+        const itemsPerPage = 10;
+        if (array.length % itemsPerPage === 0) {
+            pagesCount = Math.floor(array.length / itemsPerPage);
+        } else {
+            pagesCount = Math.floor(array.length / itemsPerPage) + 1;
+        }
+        this.setState({pagesCount: pagesCount});
+    }
+
+    handlePageChange(event, page) {
+        this.makeData(this.state.actors, page);
+        this.setState({currentPage: page});
+    }
+
     render() {
         return (
             <div>
@@ -195,7 +227,7 @@ class Actors extends React.Component {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {this.state.actors.map((row, index) => (
+                        {this.state.actorsShowing.map((row, index) => (
                             <TableRow key={index}>
                                 <TableCell component="th" scope="row">
                                     {row.name}
@@ -215,6 +247,9 @@ class Actors extends React.Component {
                 </Table>
                 <div>
                     <img className="cursor" src={addIcon} onClick={this.handleOpenAddingNewActor}></img>
+                </div>
+                <div className="pagination">
+                    <Pagination count={this.state.pagesCount} variant="outlined" onChange={this.handlePageChange} page={this.state.currentPage}/>
                 </div>
                 <Modal
                     open={this.state.openAdding}

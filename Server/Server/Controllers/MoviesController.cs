@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Server.Data;
+using Server.DTOS;
 using Server.Models;
+using Server.Services;
 
 namespace Server.Controllers
 {
@@ -16,37 +18,40 @@ namespace Server.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly ServerContext _context;
+        private IMovieRepository _movieRepository;
 
-        public MoviesController(ServerContext context)
+        public MoviesController(IMovieRepository movieRepository)
         {
-            _context = context;
+            _movieRepository = movieRepository;
         }
 
         // GET: api/Movies
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie()
+        public ActionResult<IEnumerable<MovieDTO>> GetMovie()
         {
-            return await _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre).ToListAsync();
+            return Ok(_movieRepository.GetMovie());
         }
 
         // GET: api/Movies/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Movie>> GetMovie(int id)
+        public ActionResult<MovieDTO> GetMovie(int id)
         {
-            var movie = await _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre).FirstOrDefaultAsync(sc => sc.Id == id);
+            if (id <= 0)
+            {
+                return NotFound();
+            }
+
+            var movie = _movieRepository.GetMovie(id);
 
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return movie;
+            return Ok(movie);
         }
 
         // PUT: api/Movies/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMovie(int id, Movie movie)
         {
@@ -54,74 +59,43 @@ namespace Server.Controllers
             {
                 return BadRequest();
             }
-
-            _context.Entry(movie).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MovieExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Movies
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Movie>> PostMovie(Movie movie)
-        {
-            _context.Movie.Add(movie);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
-        }
-
-        // DELETE: api/Movies/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Movie>> DeleteMovie(int id)
-        {
-            var movie = await _context.Movie.FindAsync(id);
-            if (movie == null)
+            if (!_movieRepository.MovieExists(id))
             {
                 return NotFound();
             }
 
-            _context.Movie.Remove(movie);
-            await _context.SaveChangesAsync();
+            return Ok(await _movieRepository.PutMovie(id, movie));
+        }
 
-            return movie;
+        // POST: api/Movies
+        [HttpPost]
+        public async Task<ActionResult<MovieDTO>> PostMovie(Movie movie)
+        {
+            return CreatedAtAction("GetMovie", new { id = movie.Id }, await _movieRepository.PostMovie(movie));
+        }
+
+        // DELETE: api/Movies/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<MovieDTO>> DeleteMovie(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+            await _movieRepository.DeleteMovie(id);
+
+            return NoContent();
         }
 
         [HttpGet("{pattern}/{searchType}")]
-        public async Task<ActionResult<IEnumerable<Movie>>> Search(string pattern, string searchType)
+        public ActionResult<IEnumerable<MovieDTO>> Search(string pattern, string searchType)
         {
-            var query = _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre);
-            if (searchType.Equals("name"))
+            if (pattern == "" || searchType == "")
             {
-                return await query.Where(movie => movie.Name.Contains(pattern)).ToListAsync();
+                return BadRequest();
             }
-            else if(searchType.Equals("releaseDate"))
-            {
-                return await query.Where(movie => movie.ReleaseDate.ToString().Contains(pattern)).ToListAsync();
-            }
-            return await query.Where(genres => genres.MovieGenre.Any(genre => genre.Genre.Name.Contains(pattern))).ToListAsync();
-        }
 
-        private bool MovieExists(int id)
-        {
-            return _context.Movie.Any(e => e.Id == id);
+            return Ok(_movieRepository.Search(pattern, searchType));
         }
     }
 }

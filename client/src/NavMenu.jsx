@@ -1,4 +1,4 @@
-import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
 import React from "react";
 import ReactDOM from "react-dom";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -17,9 +17,15 @@ class NavMenu extends React.Component {
                     <Toolbar>
                         <div className="toolbar-align">
                             <div className="toolbar-items">
-                                <Button variant="contained" color="primary" href="/actors">Actors</Button>
-                                <Button variant="contained" color="primary" href="/genres">Genres</Button>
-                                <Button variant="contained" color="primary" href="/movies">Movies</Button>
+                                <div className="link-align">
+                                    <Button variant="contained" color="primary"><Link className="toolbar-link" to={"/actors"}>Actors</Link></Button>
+                                </div>
+                                <div className="link-align">
+                                    <Button variant="contained" color="primary"><Link className="toolbar-link" to={"/genres"}>Genres</Link></Button>
+                                </div>
+                                <div className="link-align">
+                                    <Button variant="contained" color="primary"><Link className="toolbar-link" to={"/movies"}>Movies</Link></Button>
+                                </div>
                             </div>
                         </div>
                     </Toolbar>
@@ -28,9 +34,6 @@ class NavMenu extends React.Component {
                     <Route path={'/actors'} component={Actors}/>
                     <Route path={'/genres'} component={Genres}/>
                     <Route path={'/movies'} component={Movies}/>
-                    {/*<Route path={'/'} exact component={Home}/>*/}
-                    {/*<Route path={`/shops/:user_id/bicycles`} exact component={Bicycles}/>*/}
-                    {/*<Route component={pageNotFoundError} />*/}
                 </Switch>
             </Router>
         );

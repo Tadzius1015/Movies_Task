@@ -20,7 +20,7 @@ namespace Server.Models
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "The name must contain letters only")]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "The first name field is required")]
+        [Required(ErrorMessage = "The last name field is required")]
         [MinLength(3, ErrorMessage = "The last name must be at least 3 characters")]
         [MaxLength(40, ErrorMessage = "The last name may not exceed 40 characters")]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "The last name must contain letters only")]

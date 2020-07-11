@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Models;
+using Server.Services;
 
 namespace Server.Controllers
 {
@@ -14,87 +15,22 @@ namespace Server.Controllers
     [ApiController]
     public class MovieActorsController : ControllerBase
     {
-        private readonly ServerContext _context;
+        private IMovieActorRepository _movieActorRepository;
 
-        public MovieActorsController(ServerContext context)
+        public MovieActorsController(IMovieActorRepository movieActorRepository)
         {
-            _context = context;
+            _movieActorRepository = movieActorRepository;
         }
 
-        // GET: api/MovieActors
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieActor>>> GetMovieActor()
+        [HttpPost]
+        public async Task<ActionResult<MovieActor>> PostMovieActor([FromBody] MovieActorsAddRequest request)
         {
-            return await _context.MovieActor.ToListAsync();
-        }
-
-        // GET: api/MovieActors/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MovieActor>> GetMovieActor(int id)
-        {
-            var movieActor = await _context.MovieActor.FindAsync(id);
-
-            if (movieActor == null)
-            {
-                return NotFound();
-            }
-
-            return movieActor;
-        }
-
-        // PUT: api/MovieActors/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMovieActor(int id, MovieActor movieActor)
-        {
-            if (id != movieActor.ActorId)
+            if (request == null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(movieActor).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MovieActorExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/MovieActors
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<MovieActor>> PostMovieActor([FromBody] MovieActorsAddRequest request)
-        {
-            foreach (Actor item in request.AddingActors)
-            {
-                if (!MovieActorExists(item.Id, request.MovieId))
-                {
-                    _context.MovieActor.Add(new MovieActor(item.Id, request.MovieId));
-                }
-            }
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                throw;
-            }
+            await _movieActorRepository.PostMovieActor(request);
 
             return StatusCode(201, request.AddingActors);
         }
@@ -103,23 +39,14 @@ namespace Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<MovieActor>> DeleteMovieActor(int id, [FromBody] MovieActorsDeleteRequest request)
         {
-            foreach (Actor actor in request.DeletingActors)
+            if (id <= 0 || request == null)
             {
-                var movieActor = await _context.MovieActor.Where(el => el.ActorId == actor.Id && el.MovieId == id).FirstOrDefaultAsync();
-                _context.MovieActor.Remove(movieActor);
+                return BadRequest();
             }
-            await _context.SaveChangesAsync();
+
+            await _movieActorRepository.DeleteMovieActor(id, request);
 
             return NoContent();
-        }
-        private bool MovieActorExists(int id)
-        {
-            return _context.MovieActor.Any(e => e.ActorId == id);
-        }
-
-        private bool MovieActorExists(int actorId, int movieId)
-        {
-            return _context.MovieActor.Any(e => e.ActorId == actorId && e.MovieId == movieId);
         }
     }
 }
