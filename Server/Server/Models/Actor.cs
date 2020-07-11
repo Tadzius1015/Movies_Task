@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Server.Models
 {
@@ -28,5 +29,9 @@ namespace Server.Models
         [Required(ErrorMessage = "The birth date field is required")]
         [Column(TypeName = "date")]
         public DateTime? BirthDate { get; set; }
+
+        [ForeignKey("ActorId")]
+        [JsonIgnore]
+        public List<MovieActor> MovieActor { get; set; }
     }
 }

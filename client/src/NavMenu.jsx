@@ -7,6 +7,7 @@ import Button from "@material-ui/core/Button";
 import './NavMenu.css';
 import Actors from "./Actors";
 import Genres from "./Genres";
+import Movies from "./Movies";
 
 class NavMenu extends React.Component {
     render() {
@@ -26,7 +27,7 @@ class NavMenu extends React.Component {
                 <Switch>
                     <Route path={'/actors'} component={Actors}/>
                     <Route path={'/genres'} component={Genres}/>
-                    {/*<Route path={'/profile'} component={Profile}/>*/}
+                    <Route path={'/movies'} component={Movies}/>
                     {/*<Route path={'/'} exact component={Home}/>*/}
                     {/*<Route path={`/shops/:user_id/bicycles`} exact component={Bicycles}/>*/}
                     {/*<Route component={pageNotFoundError} />*/}

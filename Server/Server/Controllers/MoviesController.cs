@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Server.Data;
+using Server.Models;
+
+namespace Server.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MoviesController : ControllerBase
+    {
+        private readonly ServerContext _context;
+
+        public MoviesController(ServerContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/Movies
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie()
+        {
+            return await _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre).ToListAsync();
+        }
+
+        // GET: api/Movies/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Movie>> GetMovie(int id)
+        {
+            var movie = await _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre).FirstOrDefaultAsync(sc => sc.Id == id);
+
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            return movie;
+        }
+
+        // PUT: api/Movies/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMovie(int id, Movie movie)
+        {
+            if (id != movie.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(movie).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MovieExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Movies
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
+        public async Task<ActionResult<Movie>> PostMovie(Movie movie)
+        {
+            _context.Movie.Add(movie);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
+        }
+
+        // DELETE: api/Movies/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Movie>> DeleteMovie(int id)
+        {
+            var movie = await _context.Movie.FindAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            _context.Movie.Remove(movie);
+            await _context.SaveChangesAsync();
+
+            return movie;
+        }
+
+        [HttpGet("{pattern}/{searchType}")]
+        public async Task<ActionResult<IEnumerable<Movie>>> Search(string pattern, string searchType)
+        {
+            var query = _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).ThenInclude(mv => mv.Genre);
+            if (searchType.Equals("name"))
+            {
+                return await query.Where(movie => movie.Name.Contains(pattern)).ToListAsync();
+            }
+            else if(searchType.Equals("releaseDate"))
+            {
+                return await query.Where(movie => movie.ReleaseDate.ToString().Contains(pattern)).ToListAsync();
+            }
+            return await query.Where(genres => genres.MovieGenre.Any(genre => genre.Genre.Name.Contains(pattern))).ToListAsync();
+        }
+
+        private bool MovieExists(int id)
+        {
+            return _context.Movie.Any(e => e.Id == id);
+        }
+    }
+}
