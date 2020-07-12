@@ -53,7 +53,7 @@ namespace Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
-            if (id != genre.Id)
+            if (genre == null || id != genre.Id)
             {
                 return BadRequest();
             }
@@ -69,6 +69,10 @@ namespace Server.Controllers
         [HttpPost]
         public async Task<ActionResult<GenreDTO>> PostGenre(Genre genre)
         {
+            if (genre == null)
+            {
+                return BadRequest();
+            }
             if (_genreRepository.GenreExists(genre.Name))
             {
                 return BadRequest("Genre exists in system!");

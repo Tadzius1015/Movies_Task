@@ -8,6 +8,7 @@ import './NavMenu.css';
 import Actors from "./Actors";
 import Genres from "./Genres";
 import Movies from "./Movies";
+import pageNotFoundError from "./pageNotFoundError";
 
 class NavMenu extends React.Component {
     render() {
@@ -34,6 +35,8 @@ class NavMenu extends React.Component {
                     <Route path={'/actors'} component={Actors}/>
                     <Route path={'/genres'} component={Genres}/>
                     <Route path={'/movies'} component={Movies}/>
+                    <Route path={'/'} exact component={Movies}/>
+                    <Route component={pageNotFoundError} />
                 </Switch>
             </Router>
         );
