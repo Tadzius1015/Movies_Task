@@ -59,10 +59,20 @@ class Movies extends React.Component {
         this.handlePageChange = this.handlePageChange.bind(this);
         this.calculatePagesCount = this.calculatePagesCount.bind(this);
         this.addAndRemoveMoviesAndActors = this.addAndRemoveMoviesAndActors.bind(this);
+        this.addActorsOrGenres = this.addActorsOrGenres.bind(this);
     }
 
     componentWillMount() {
         this.getData();
+    }
+
+    async addActorsOrGenres(actorsArray, genresArray, id) {
+        if (actorsArray.length > 0) {
+            this.addNewActorsToMovie(actorsArray, id);
+        }
+        if (genresArray.length > 0) {
+            this.addNewGenresToMovie(genresArray, id);
+        }
     }
 
     async insertMovie(name, releaseDate, genresArray, actorsArray) {
@@ -72,8 +82,7 @@ class Movies extends React.Component {
                 name: name,
                 releaseDate: releaseDate,
             });
-            this.addNewGenresToMovie(genresArray, response.data.id);
-            this.addNewActorsToMovie(actorsArray, response.data.id);
+            this.addActorsOrGenres(actorsArray, genresArray, response.data.id);
             this.setState({message: 'New movie inserted successfully!'});
             this.setState({openSnackbar: true});
             this.handleCloseAddingNewMovie();
@@ -153,7 +162,7 @@ class Movies extends React.Component {
         }
     }
 
-    addAndRemoveMoviesAndActors(deletingGenresArray, deletingActorsArray, addingActorsArray, addingGenresArray, id) {
+    async addAndRemoveMoviesAndActors(deletingGenresArray, deletingActorsArray, addingActorsArray, addingGenresArray, id) {
         if (deletingGenresArray.length > 0) {
             this.deleteGenresFromMovie(deletingGenresArray, id);
         }

@@ -53,7 +53,7 @@ namespace Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutActor(int id, Actor actor)
         {
-            if (id != actor.Id)
+            if (actor == null || id != actor.Id)
             {
                 return BadRequest();
             }
@@ -68,7 +68,12 @@ namespace Server.Controllers
         // POST: api/Actors
         [HttpPost]
         public async Task<ActionResult<ActorDTO>> PostActor(Actor actor)
-        {         
+        {
+            if (actor == null)
+            {
+                return BadRequest();
+            }
+
             return CreatedAtAction("GetActor", new { id = actor.Id }, await _actorRepository.PostActor(actor));
         }
 

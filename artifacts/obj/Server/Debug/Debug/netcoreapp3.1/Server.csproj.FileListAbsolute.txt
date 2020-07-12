@@ -1,0 +1,5 @@
+C:\Users\Namai\Desktop\Movies_Task\artifacts\obj\Server\Debug\Debug\netcoreapp3.1\Server.csprojAssemblyReference.cache
+C:\Users\Namai\Desktop\Movies_Task\artifacts\obj\Server\Debug\Debug\netcoreapp3.1\Server.AssemblyInfoInputs.cache
+C:\Users\Namai\Desktop\Movies_Task\artifacts\obj\Server\Debug\Debug\netcoreapp3.1\Server.AssemblyInfo.cs
+C:\Users\Namai\Desktop\Movies_Task\artifacts\obj\Server\Debug\Debug\netcoreapp3.1\Server.csproj.CoreCompileInputs.cache
+C:\Users\Namai\Desktop\Movies_Task\artifacts\obj\Server\Debug\Debug\netcoreapp3.1\Server.MvcApplicationPartsAssemblyInfo.cache

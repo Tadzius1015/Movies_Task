@@ -45,18 +45,12 @@ namespace Server.Services
 
         public MovieDTO GetMovie(int id)
         {
-            var movie = _context.Movie.Include(act => act.MovieActor).ThenInclude(act => act.Actor).Include(mv => mv.MovieGenre).
-                ThenInclude(mv => mv.Genre).FirstOrDefault(sc => sc.Id == id);
+            var movie = GetMovie().FirstOrDefault(mv => mv.Id == id);
 
-            return Mapper.Map<Movie, MovieDTO>(movie);
+            return movie;
         }
         public async Task<MovieDTO> PutMovie(int id, Movie movie)
         {
-            if (movie == null)
-            {
-                return null;
-            }
-
             _context.Entry(movie).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             await _context.SaveChangesAsync();
 

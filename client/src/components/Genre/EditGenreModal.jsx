@@ -28,7 +28,7 @@ export default class EditGenreModal extends React.Component {
             <div>
                 <Paper className="modalSize">
                     <Typography style={{marginBottom:'30px', marginTop:'30px', textAlign:'center'}} variant="h5" component="h1">
-                        Genre {this.state.name} editing form
+                        Genre {this.props.row.name} editing form
                     </Typography>
                     <FormControl>
                         <TextField

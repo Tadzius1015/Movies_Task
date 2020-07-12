@@ -55,7 +55,7 @@ namespace Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMovie(int id, Movie movie)
         {
-            if (id != movie.Id)
+            if (movie == null || id != movie.Id)
             {
                 return BadRequest();
             }
@@ -71,6 +71,11 @@ namespace Server.Controllers
         [HttpPost]
         public async Task<ActionResult<MovieDTO>> PostMovie(Movie movie)
         {
+            if (movie == null)
+            {
+                return BadRequest();
+            }
+
             return CreatedAtAction("GetMovie", new { id = movie.Id }, await _movieRepository.PostMovie(movie));
         }
 
